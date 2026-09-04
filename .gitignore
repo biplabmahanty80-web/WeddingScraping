@@ -1,0 +1,11 @@
+.env
+*.log
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+Data_Jharkhand/
+jharkhand_progress.json
+scraper_jharkhand.log
+.venv/
+venv/

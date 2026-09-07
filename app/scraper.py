@@ -244,23 +244,13 @@ class GoogleMapsGeoScraper:
                 links = await self._extract_place_links(page)
                 seen: Set[str] = set()
                 urls: List[str] = []
-                skipped = 0
                 for lnk in links:
                     if lnk in self.processed_urls or lnk in seen:
                         continue
-                    coords = self._coords_from_url(lnk)
-                    if coords:
-                        dist = self._haversine_m(lat, lng, coords[0], coords[1])
-                        if dist > self.max_distance:
-                            skipped += 1
-                            logger.debug(f"  [collect] skip dist={dist/1000:.1f}km > {self.max_distance/1000:.0f}km")
-                            continue
                     urls.append(lnk)
                     seen.add(lnk)
 
-                if skipped:
-                    logger.info(f"  [collect] skipped {skipped} outside radius")
-                logger.info(f"  [collect] found {len(urls)} new URLs for '{term}'")
+                logger.info(f"  [collect] found {len(urls)} new URLs for '{term}'"
                 self._collect_succeeded = True
                 return urls[:MAX_RESULTS]
 

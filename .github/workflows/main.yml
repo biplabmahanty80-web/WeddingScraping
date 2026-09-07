@@ -1,0 +1,34 @@
+name: Wedding Scraper
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'   # restarts every 5 hours automatically
+  workflow_dispatch:          # allows manual trigger from GitHub UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 330      # 5.5 hours — stays under GitHub's 6h limit
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Run worker
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SCRAPER_CATEGORY: Bartender
+          SCRAPER_STATE: Jharkhand
+          SCRAPER_BATCH_SIZE: '10'
+          MAX_LOCATION_ATTEMPTS: '3'
+          MAX_RESULTS: '30'
+          STALE_RUNNING_MINUTES: '30'
+        run: python -m app.worker

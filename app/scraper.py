@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 CITY_ZOOM    = 13
 TOWN_ZOOM    = 14
-RURAL_ZOOM   = 15
+RURAL_ZOOM   = 20
 DEFAULT_ZOOM = 14
 FALLBACK_ZOOMS = [13, 12, 11, 10]
 

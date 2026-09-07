@@ -16,7 +16,7 @@ from playwright.async_api import async_playwright
 
 from app import config
 from app.database import (
-    close_pool, create_pool, claim_locations, get_or_create_job,
+    close_pool, create_pool, claim_locations, get_existing_urls, get_or_create_job,
     mark_location_completed, mark_location_failed, record_discovery,
     recover_stale_locations, update_job_progress, upsert_business,
 )
@@ -68,7 +68,7 @@ async def process_location(loc, ctx, job_id: int, search_terms: list, category: 
     )
 
     saved = 0
-    async for profile in scraper.scrape_all_async(ctx, settings["search_terms"]):
+    async for profile in scraper.scrape_all_async(ctx, settings["search_terms"], existing_url_checker=get_existing_urls):
         try:
             biz_id = await upsert_business(profile, category)
             await record_discovery(biz_id, location_id, job_id, profile.get("search_term", ""))

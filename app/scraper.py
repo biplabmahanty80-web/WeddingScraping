@@ -357,7 +357,8 @@ class GoogleMapsGeoScraper:
     # ── Main scrape method — yields profiles instead of saving to JSON ────────
 
     async def scrape_all_async(
-        self, ctx: BrowserContext, search_terms: List[str]
+        self, ctx: BrowserContext, search_terms: List[str],
+        existing_url_checker=None,
     ) -> AsyncIterator[dict]:
         """
         Scrape all businesses for this location.
@@ -388,6 +389,12 @@ class GoogleMapsGeoScraper:
             return
 
         logger.info(f"  Found {len(business_urls)} candidate URLs")
+
+        if existing_url_checker:
+            known = await existing_url_checker(business_urls)
+            before = len(business_urls)
+            business_urls = [u for u in business_urls if u not in known]
+            logger.info(f"  Skipped {before - len(business_urls)} known, {len(business_urls)} new to scrape")
 
         detail_page = await ctx.new_page()
         try:

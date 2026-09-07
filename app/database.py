@@ -246,6 +246,15 @@ async def upsert_business(profile: dict, scraper_category: str) -> int:
     return business_id
 
 
+async def get_existing_urls(urls: List[str]) -> set:
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT gmaps_url FROM businesses WHERE gmaps_url = ANY($1)", urls
+        )
+    return {r["gmaps_url"] for r in rows}
+
+
 async def record_discovery(business_id: int, location_id: int, job_id: int, search_term: str):
     pool = get_pool()
     async with pool.acquire() as conn:

@@ -22,14 +22,14 @@ logger = logging.getLogger(__name__)
 # ── Constants (unchanged from original) ──────────────────────────────────────
 
 CITY_ZOOM    = 13
-TOWN_ZOOM    = 13
-RURAL_ZOOM   = 13
-DEFAULT_ZOOM = 13
-FALLBACK_ZOOMS = [12, 11, 10]
+TOWN_ZOOM    = 14
+RURAL_ZOOM   = 15
+DEFAULT_ZOOM = 14
+FALLBACK_ZOOMS = [13, 12, 11, 10]
 
 MAX_RESULT_DISTANCE_CITY  = 30_000
-MAX_RESULT_DISTANCE_TOWN  = 30_000
-MAX_RESULT_DISTANCE_RURAL = 30_000
+MAX_RESULT_DISTANCE_TOWN  = 20_000
+MAX_RESULT_DISTANCE_RURAL = 15_000
 
 SCROLL_ITERS = 80
 MAX_CTX_USES = 40
@@ -244,12 +244,21 @@ class GoogleMapsGeoScraper:
                 links = await self._extract_place_links(page)
                 seen: Set[str] = set()
                 urls: List[str] = []
+                skipped = 0
                 for lnk in links:
                     if lnk in self.processed_urls or lnk in seen:
                         continue
+                    coords = self._coords_from_url(lnk)
+                    if coords:
+                        dist = self._haversine_m(lat, lng, coords[0], coords[1])
+                        if dist > self.max_distance:
+                            skipped += 1
+                            continue
                     urls.append(lnk)
                     seen.add(lnk)
 
+                if skipped:
+                    logger.info(f"  [collect] skipped {skipped} outside radius")
                 logger.info(f"  [collect] found {len(urls)} new URLs for '{term}'")
                 self._collect_succeeded = True
                 return urls[:MAX_RESULTS]
@@ -398,11 +407,9 @@ class GoogleMapsGeoScraper:
 
         detail_page = await ctx.new_page()
         try:
-            total_urls = len(business_urls)
-            for i, url in enumerate(business_urls, 1):
+            for url in business_urls:
                 if url in self.processed_urls:
                     continue
-                logger.info(f"  [detail] {i}/{total_urls}")
                 await asyncio.sleep(random.uniform(0.5, 1.5))
                 profile = await self._scrape_details(detail_page, url)
                 if profile:

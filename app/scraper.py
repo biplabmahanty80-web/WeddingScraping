@@ -250,7 +250,7 @@ class GoogleMapsGeoScraper:
                     urls.append(lnk)
                     seen.add(lnk)
 
-                logger.info(f"  [collect] found {len(urls)} new URLs for '{term}'"
+                logger.info(f"  [collect] found {len(urls)} new URLs for '{term}'")
                 self._collect_succeeded = True
                 return urls[:MAX_RESULTS]
 

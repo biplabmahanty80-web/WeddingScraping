@@ -391,9 +391,11 @@ class GoogleMapsGeoScraper:
 
         detail_page = await ctx.new_page()
         try:
-            for url in business_urls:
+            total_urls = len(business_urls)
+            for i, url in enumerate(business_urls, 1):
                 if url in self.processed_urls:
                     continue
+                logger.info(f"  [detail] {i}/{total_urls}")
                 await asyncio.sleep(random.uniform(0.5, 1.5))
                 profile = await self._scrape_details(detail_page, url)
                 if profile:

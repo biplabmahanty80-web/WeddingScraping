@@ -22,14 +22,14 @@ logger = logging.getLogger(__name__)
 # ── Constants (unchanged from original) ──────────────────────────────────────
 
 CITY_ZOOM    = 13
-TOWN_ZOOM    = 14
-RURAL_ZOOM   = 20
-DEFAULT_ZOOM = 14
-FALLBACK_ZOOMS = [13, 12, 11, 10]
+TOWN_ZOOM    = 13
+RURAL_ZOOM   = 13
+DEFAULT_ZOOM = 13
+FALLBACK_ZOOMS = [12, 11, 10]
 
 MAX_RESULT_DISTANCE_CITY  = 30_000
-MAX_RESULT_DISTANCE_TOWN  = 20_000
-MAX_RESULT_DISTANCE_RURAL = 15_000
+MAX_RESULT_DISTANCE_TOWN  = 30_000
+MAX_RESULT_DISTANCE_RURAL = 30_000
 
 SCROLL_ITERS = 80
 MAX_CTX_USES = 40
@@ -253,6 +253,7 @@ class GoogleMapsGeoScraper:
                         dist = self._haversine_m(lat, lng, coords[0], coords[1])
                         if dist > self.max_distance:
                             skipped += 1
+                            logger.debug(f"  [collect] skip dist={dist/1000:.1f}km > {self.max_distance/1000:.0f}km")
                             continue
                     urls.append(lnk)
                     seen.add(lnk)
